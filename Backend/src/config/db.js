@@ -1,15 +1,18 @@
 import mongoose from "mongoose";
-import "dotenv/config";
+import dotenv from "dotenv";
 
-const DB = process.env.MONGODB;
+dotenv.config();
+
+const DB = process.env.MONGODB; // fallback
 const connectDB = async () => {
   try {
     if (!DB) {
       throw new Error("Database url missing");
     }
     await mongoose.connect(DB);
-    console.log("DataBase Connected");
+    console.log("Database Connected");
   } catch (error) {
+    console.log(error);
     process.exit(1);
   }
 };

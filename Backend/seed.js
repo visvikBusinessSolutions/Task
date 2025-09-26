@@ -1,7 +1,6 @@
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
-import connectDB from "./src/config/db.js";
 import userModel from "./src/models/userModel.js";
 import taskModel from "./src/models/taskModel.js";
 import projectModel from "./src/models/projectModel.js";

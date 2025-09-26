@@ -1,4 +1,5 @@
-import userModel from "../models/user/userModel.js";
+
+import userModel from "../models/userModel.js";
 import { generateAccessToken } from "../utils/jwt.js";
 
 export const userRegister = async (req, res, next) => {
