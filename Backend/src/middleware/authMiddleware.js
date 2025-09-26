@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
 import userModel from "../models/user/userModel.js";
 
-
 const authMiddleware = async (req, res, next) => {
   const token = req.headers.authorization;
 
@@ -17,6 +16,7 @@ const authMiddleware = async (req, res, next) => {
 
     const decode = jwt.verify(parts[1], process.env.JWT_ACCESS_SECRET);
     req.user = await userModel.findById(decode.id);
+    if (!req.user) throw new Error("User not found");
     next();
   } catch (error) {
     console.error("Error in token verification:", error);
