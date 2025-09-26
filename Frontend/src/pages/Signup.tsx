@@ -49,32 +49,31 @@ const Signup: React.FC = () => {
       return handleError("name, email and password are required");
     }
     try {
-      const url = `https://deploy-mern-app-1-api.vercel.app/auth/signup`;
+      const url = `http://localhost:8080/api/v1/user/auth/register`;
       const response = await fetch(url, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(signupInfo),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: name, // ✅ backend expects username
+          email,
+          password,
+        }),
       });
-      const result: ApiResponse = await response.json();
-      const { success, message, error } = result;
+
+      const result = await response.json();
+      const { success, msg } = result;
+
       if (success) {
-        handleSuccess(message);
-        setTimeout(() => {
-          navigate("/login");
-        }, 1000);
-      } else if (error) {
-        const details = error?.details[0]?.message;
-        handleError(details || "An error occurred");
-      } else if (!success) {
-        handleError(message);
+        handleSuccess(msg);
+        setTimeout(() => navigate("/login"), 1000);
+      } else {
+        handleError(msg || "An error occurred");
       }
-      console.log(result);
     } catch (err) {
       handleError(err as Error);
     }
   };
+
 
   return (
     <div className="container">

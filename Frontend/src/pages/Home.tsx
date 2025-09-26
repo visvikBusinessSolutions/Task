@@ -6,7 +6,7 @@ import { ToastContainer } from "react-toastify";
 
 interface Product {
   name: string;
-  price: number;
+  description: string;
 }
 
 function Home() {
@@ -29,7 +29,7 @@ function Home() {
 
   const fetchProducts = async () => {
     try {
-      const url = "https://deploy-mern-app-1-api.vercel.app/products";
+      const url = "http://localhost:8080/Projects";
       const headers = {
         headers: {
           Authorization: localStorage.getItem("token") || "",
@@ -59,7 +59,7 @@ function Home() {
           products.map((item, index) => (
             <ul key={index}>
               <span>
-                {item.name} : {item.price}
+                {item.name} : {item.description}
               </span>
             </ul>
           ))}
