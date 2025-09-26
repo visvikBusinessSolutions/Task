@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+
+import React, { useEffect, useState } from "react";
+import API from "../api/projectApi";
 
 type Project = {
-  id: number;
+  _id: string;
   title: string;
   description: string;
   status: "Pending" | "In Progress" | "Completed";
@@ -9,41 +11,76 @@ type Project = {
 
 const ProjectDashboard: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [newProject, setNewProject] = useState<Omit<Project, "id">>({
+  const [newProject, setNewProject] = useState<Omit<Project, "_id">>({
     title: "",
     description: "",
     status: "Pending",
   });
 
-  // Create Project
-  const handleAddProject = () => {
+  // ✅ Fetch all projects on mount
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const res = await API.get("/");
+        if (res.data.success) {
+          setProjects(res.data.data || []);
+        }
+      } catch (err) {
+        console.error("Error fetching projects:", err);
+      }
+    };
+    fetchProjects();
+  }, []);
+
+  // ✅ Create Project
+  const handleAddProject = async () => {
     if (!newProject.title.trim() || !newProject.description.trim()) return;
 
-    const project: Project = {
-      id: Date.now(),
-      ...newProject,
-    };
-
-    setProjects([...projects, project]);
-    setNewProject({ title: "", description: "", status: "Pending" });
+    try {
+      const res = await API.post("/", newProject);
+      if (res.data.success) {
+        setProjects([...projects, res.data.data]);
+        setNewProject({ title: "", description: "", status: "Pending" });
+      }
+    } catch (err) {
+      console.error("Error creating project:", err);
+    }
   };
 
-  // Update Project
-  const handleUpdateProject = (
-    id: number,
+  // ✅ Update Project
+  const handleUpdateProject = async (
+    id: string,
     field: keyof Project,
     value: string
   ) => {
-    setProjects(
-      projects.map((proj) =>
-        proj.id === id ? { ...proj, [field]: value } : proj
-      )
-    );
+    try {
+      const updatedProject = projects.find((p) => p._id === id);
+      if (!updatedProject) return;
+
+      const res = await API.put(`/${id}`, {
+        ...updatedProject,
+        [field]: value,
+      });
+      if (res.data.success) {
+        setProjects(
+          projects.map((proj) => (proj._id === id ? res.data.data : proj))
+        );
+      }
+    } catch (err) {
+      console.error("Error updating project:", err);
+    }
   };
 
-  // Delete Project
-  const handleDeleteProject = (id: number) => {
-    setProjects(projects.filter((proj) => proj.id !== id));
+  // ✅ Delete Project
+  const handleDeleteProject = async (id: string) => {
+    try {
+      const res = await API.delete(`/${id}`);
+      if (res.data.success) {
+        setProjects(projects.filter((proj) => proj._id !== id));
+      }
+    } catch (err) {
+      console.error("Error deleting project:", err);
+    }
   };
 
   return (
@@ -149,7 +186,7 @@ const ProjectDashboard: React.FC = () => {
               <tbody>
                 {projects.map((proj) => (
                   <tr
-                    key={proj.id}
+                    key={proj._id}
                     className="border-b border-gray-200 hover:bg-gray-50 transition-colors duration-200"
                   >
                     {/* Title */}
@@ -158,7 +195,7 @@ const ProjectDashboard: React.FC = () => {
                         className="w-full border-b border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-400 p-1 text-lg font-semibold"
                         value={proj.title}
                         onChange={(e) =>
-                          handleUpdateProject(proj.id, "title", e.target.value)
+                          handleUpdateProject(proj._id, "title", e.target.value)
                         }
                       />
                     </td>
@@ -171,7 +208,7 @@ const ProjectDashboard: React.FC = () => {
                         value={proj.description}
                         onChange={(e) =>
                           handleUpdateProject(
-                            proj.id,
+                            proj._id,
                             "description",
                             e.target.value
                           )
@@ -186,7 +223,7 @@ const ProjectDashboard: React.FC = () => {
                         value={proj.status}
                         onChange={(e) =>
                           handleUpdateProject(
-                            proj.id,
+                            proj._id,
                             "status",
                             e.target.value as Project["status"]
                           )
@@ -201,7 +238,7 @@ const ProjectDashboard: React.FC = () => {
                     {/* Actions */}
                     <td className="px-4 py-2 text-center">
                       <button
-                        onClick={() => handleDeleteProject(proj.id)}
+                        onClick={() => handleDeleteProject(proj._id)}
                         className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition-colors duration-200"
                       >
                         Delete

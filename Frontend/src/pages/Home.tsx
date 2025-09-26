@@ -1,17 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { handleError, handleSuccess } from "../utils";
+import { handleSuccess } from "../utils";
 import { ToastContainer } from "react-toastify";
 import ProjectDashboard from "../component/project";
 
-interface Product {
-  name: string;
-  description: string;
-}
-
 function Home() {
   const [loggedInUser, setLoggedInUser] = useState<string | null>("");
-  const [products, setProducts] = useState<Product[] | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,27 +21,7 @@ function Home() {
     }, 1000);
   };
 
-  const fetchProducts = async () => {
-    try {
-      const url = "http://localhost:8080/Projects";
-      const headers = {
-        headers: {
-          Authorization: localStorage.getItem("token") || "",
-        },
-      };
-      const response = await fetch(url, headers);
-      const result: Product[] = await response.json();
-      console.log(result);
-      setProducts(result);
-    } catch (err) {
-      handleError(err as Error);
-    }
-  };
-
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
+  
   return (
     <div className="full">
       <div className="flex justify-between items-center md:mx-auto md:p-6">
