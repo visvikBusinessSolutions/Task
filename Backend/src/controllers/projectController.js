@@ -2,17 +2,23 @@ import projectModel from "../models/projectModel.js";
 
 export const createProject = async (req, res) => {
   try {
-    const { title, description } = req.body;
+    const { title, description, status } = req.body;
     if (!title || !description) {
       return res
         .status(400)
         .json({ success: false, msg: "Title and description required" });
+    }
+    if (status && !["active", "completed"].includes(status)) {
+      return res
+        .status(400)
+        .json({ success: false, msg: "Invalid project status" });
     }
 
     const project = await projectModel.create({
       user: req.user._id,
       title,
       description,
+      status: status ?? "active",
     });
 
     res
@@ -40,21 +46,28 @@ export const listUserProjects = async (req, res) => {
 
 export const updateProjectById = async (req, res) => {
   try {
-    const { title, description } = req.body;
+    const { title, description, status } = req.body;
     const id = req.params.id;
-    if (!id) {
+    if (!id)
       return res.status(400).json({ success: false, msg: "ID not provided" });
-    }
 
     const project = await projectModel.findOne({ _id: id, user: req.user._id });
-    if (!project) {
-      return res.status(404).json({ success: true, msg: "Project not found" });
+    if (!project)
+      return res.status(404).json({ success: false, msg: "Project not found" });
+
+    if (status && !["active", "completed"].includes(status)) {
+      return res
+        .status(400)
+        .json({ success: false, msg: "Invalid project status" });
     }
 
-    project.title = title || project.title;
-    project.description = description || project.description;
-    await project.save();
+    Object.assign(project, {
+      title: title ?? project.title,
+      description: description ?? project.description,
+      status: status ?? project.status,
+    });
 
+    await project.save();
     res
       .status(200)
       .json({ success: true, msg: "Project updated", data: project });
