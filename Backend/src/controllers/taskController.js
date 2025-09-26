@@ -4,17 +4,24 @@ import mongoose from "mongoose";
 
 export const createTask = async (req, res) => {
   try {
-    const { projectId, title, description, dueDate } = req.body;
-    if (!projectId || !title || !dueDate) {
-      return res
-        .status(400)
-        .json({ success: false, msg: "ProjectId, title and dueDate required" });
+    const { projectId, title, description, dueDate, status } = req.body;
+    if (!projectId || !title || !dueDate || !status) {
+      return res.status(400).json({
+        success: false,
+        msg: "ProjectId, title, status and dueDate required",
+      });
     }
 
     if (!mongoose.Types.ObjectId.isValid(projectId)) {
       return res
         .status(400)
         .json({ success: false, msg: "Invalid projectId format" });
+    }
+
+    if (status && !["todo", "in-progress", "done"].includes(status)) {
+      return res
+        .status(400)
+        .json({ success: false, msg: "Invalid task status" });
     }
 
     const project = await projectModel.findOne({
@@ -30,6 +37,7 @@ export const createTask = async (req, res) => {
       title,
       description,
       dueDate,
+      status: status ?? "todo",
     });
 
     res.status(201).json({ success: true, msg: "project created", data: task });
@@ -47,19 +55,23 @@ export const updateTask = async (req, res) => {
 
     const task = await taskModel.findById(id).populate("project");
     if (!task || String(task.project.user) !== String(req.user._id)) {
-      return res.status(404).json({ success: false, msg: "Task not found or not yours" });
+      return res
+        .status(404)
+        .json({ success: false, msg: "Task not found or not yours" });
     }
 
     const { title, description, status, dueDate } = req.body;
     if (status && !["todo", "in-progress", "done"].includes(status)) {
-      return res.status(400).json({ success: false, msg: "Invalid status" });
+      return res
+        .status(400)
+        .json({ success: false, msg: "Invalid task status" });
     }
 
-    Object.assign(task, { 
+    Object.assign(task, {
       title: title ?? task.title,
       description: description ?? task.description,
       status: status ?? task.status,
-      dueDate: dueDate ?? task.dueDate
+      dueDate: dueDate ?? task.dueDate,
     });
 
     await task.save();
@@ -79,7 +91,9 @@ export const deleteTask = async (req, res) => {
 
     const task = await taskModel.findById(id).populate("project");
     if (!task || String(task.project.user) !== String(req.user._id)) {
-      return res.status(404).json({ success: false, msg: "Task not found or not yours" });
+      return res
+        .status(404)
+        .json({ success: false, msg: "Task not found or not yours" });
     }
 
     await task.deleteOne();
