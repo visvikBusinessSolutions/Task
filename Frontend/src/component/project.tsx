@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import API from "../api/projectApi";
 
@@ -6,7 +5,7 @@ type Project = {
   _id: string;
   title: string;
   description: string;
-  status: "Pending" | "In Progress" | "Completed";
+  status: "active" | "completed";
 };
 
 const ProjectDashboard: React.FC = () => {
@@ -14,7 +13,7 @@ const ProjectDashboard: React.FC = () => {
   const [newProject, setNewProject] = useState<Omit<Project, "_id">>({
     title: "",
     description: "",
-    status: "Pending",
+    status: "active",
   });
 
   // ✅ Fetch all projects on mount
@@ -40,7 +39,7 @@ const ProjectDashboard: React.FC = () => {
       const res = await API.post("/", newProject);
       if (res.data.success) {
         setProjects([...projects, res.data.data]);
-        setNewProject({ title: "", description: "", status: "Pending" });
+        setNewProject({ title: "", description: "", status: "active" });
       }
     } catch (err) {
       console.error("Error creating project:", err);
@@ -141,9 +140,8 @@ const ProjectDashboard: React.FC = () => {
                 })
               }
             >
-              <option value="Pending">Pending</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Completed">Completed</option>
+              <option value="active">Active</option>
+              <option value="completed">Completed</option>
             </select>
           </div>
 
@@ -229,9 +227,8 @@ const ProjectDashboard: React.FC = () => {
                           )
                         }
                       >
-                        <option value="Pending">Pending</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Completed">Completed</option>
+                        <option value="active">Active</option>
+                        <option value="completed">Completed</option>
                       </select>
                     </td>
 
