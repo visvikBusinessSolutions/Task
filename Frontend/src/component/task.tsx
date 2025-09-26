@@ -1,94 +1,94 @@
 import React, { useEffect, useState } from "react";
-import API from "../api/projectApi";
-import { useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import API from "../api/taskApi";
 
-type Project = {
+type Task = {
   _id: string;
   title: string;
   description: string;
-  status: "active" | "completed";
+  status: "todo" | "in-progress" | "done";
+  dueDate: string;
 };
 
-const ProjectDashboard: React.FC = () => {
-  const navigate = useNavigate();
-  const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
-  const [editFormData, setEditFormData] = useState<Omit<Project, "_id"> | null>(
+const TaskDashboard: React.FC = () => {
+  const { id: projectId } = useParams<{ id: string }>();
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [editTaskData, setEditTaskData] = useState<Omit<Task, "_id"> | null>(
     null
   );
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [newProject, setNewProject] = useState<Omit<Project, "_id">>({
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [newTask, setNewTask] = useState<Omit<Task, "_id">>({
     title: "",
     description: "",
-    status: "active",
+    status: "todo",
+    dueDate: "",
   });
 
-  // ✅ Fetch all projects on mount
+  const handleSaveTask = async (taskId: string) => {
+    if (!editTaskData) return;
+
+    try {
+      const res = await API.put(`/${taskId}`, { ...editTaskData, projectId });
+      if (res.data.success) {
+        setTasks(tasks.map((t) => (t._id === taskId ? res.data.data : t)));
+        setEditingTaskId(null);
+        setEditTaskData(null);
+      }
+    } catch (err) {
+      console.error("Error updating task:", err);
+    }
+  };
+
+  // ✅ Fetch Tasks
   useEffect(() => {
-    const fetchProjects = async () => {
+    const fetchTasks = async () => {
       try {
-        const res = await API.get("/");
+        const res = await API.get(`/`, { params: { projectId } });
         if (res.data.success) {
-          setProjects(res.data.data || []);
+          setTasks(res.data.data || []);
         }
       } catch (err) {
-        console.error("Error fetching projects:", err);
+        console.error("Error fetching tasks:", err);
       }
     };
-    fetchProjects();
-  }, []);
+    fetchTasks();
+  }, [projectId]);
 
-  const handleSaveProject = async (id: string) => {
-    if (!editFormData) return;
+  // ✅ Create Task
+  const handleAddTask = async () => {
+    if (!newTask.title.trim() || !newTask.description.trim()) return;
 
     try {
-      const res = await API.put(`/${id}`, editFormData);
+      const res = await API.post(`/`, { ...newTask, projectId });
       if (res.data.success) {
-        setProjects(
-          projects.map((proj) => (proj._id === id ? res.data.data : proj))
-        );
-        setEditingProjectId(null); // exit edit mode
-        setEditFormData(null);
+        setTasks([...tasks, res.data.data]);
+        setNewTask({ title: "", description: "", status: "todo", dueDate: "" });
       }
     } catch (err) {
-      console.error("Error updating project:", err);
+      console.error("Error creating task:", err);
     }
   };
 
-  // ✅ Create Project
-  const handleAddProject = async () => {
-    if (!newProject.title.trim() || !newProject.description.trim()) return;
-
+  // ✅ Delete Task
+  const handleDeleteTask = async (taskId: string) => {
     try {
-      const res = await API.post("/", newProject);
+      const res = await API.delete(`/${taskId}`);
       if (res.data.success) {
-        setProjects([...projects, res.data.data]);
-        setNewProject({ title: "", description: "", status: "active" });
+        setTasks(tasks.filter((t) => t._id !== taskId));
       }
     } catch (err) {
-      console.error("Error creating project:", err);
-    }
-  };
-
-  // ✅ Delete Project
-  const handleDeleteProject = async (id: string) => {
-    try {
-      const res = await API.delete(`/${id}`);
-      if (res.data.success) {
-        setProjects(projects.filter((proj) => proj._id !== id));
-      }
-    } catch (err) {
-      console.error("Error deleting project:", err);
+      console.error("Error deleting task:", err);
     }
   };
 
   return (
     <div className="md:p-6 md:mx-auto py-2">
-      <h1 className="text-2xl font-bold mb-4">Project Dashboard</h1>
+      <h1 className="text-2xl font-bold mb-4">Tasks for Project {projectId}</h1>
 
-      {/* Create Project Form */}
+      {/* Create Task Form */}
       <div className="bg-white border-gray p-6 rounded-2xl shadow-sm w-full md:mx-auto my-6">
         <h2 className="text-2xl font-bold mb-6 text-gray-800">
-          ➕ Create Project
+          ➕ Create Task
         </h2>
 
         <div className="md:flex md:flex-wrap gap-4 items-start">
@@ -100,10 +100,10 @@ const ProjectDashboard: React.FC = () => {
             <input
               className="border border-gray-300 p-2 w-full rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
               type="text"
-              placeholder="Enter project title"
-              value={newProject.title}
+              placeholder="Enter task title"
+              value={newTask.title}
               onChange={(e) =>
-                setNewProject({ ...newProject, title: e.target.value })
+                setNewTask({ ...newTask, title: e.target.value })
               }
             />
           </div>
@@ -115,11 +115,11 @@ const ProjectDashboard: React.FC = () => {
             </label>
             <textarea
               className="border border-gray-300 p-2 w-full rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
-              placeholder="Enter project description"
+              placeholder="Enter task description"
               rows={1}
-              value={newProject.description}
+              value={newTask.description}
               onChange={(e) =>
-                setNewProject({ ...newProject, description: e.target.value })
+                setNewTask({ ...newTask, description: e.target.value })
               }
             />
           </div>
@@ -131,36 +131,52 @@ const ProjectDashboard: React.FC = () => {
             </label>
             <select
               className="border border-gray-300 p-2 w-full rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
-              value={newProject.status}
+              value={newTask.status}
               onChange={(e) =>
-                setNewProject({
-                  ...newProject,
-                  status: e.target.value as Project["status"],
+                setNewTask({
+                  ...newTask,
+                  status: e.target.value as Task["status"],
                 })
               }
             >
-              <option value="active">Active</option>
-              <option value="completed">Completed</option>
+              <option value="todo">Todo</option>
+              <option value="in-progress">In Progress</option>
+              <option value="done">Done</option>
             </select>
+          </div>
+
+          {/* Due Date */}
+          <div className="w-48">
+            <label className="block text-sm font-medium text-gray-600 mb-1">
+              Due Date
+            </label>
+            <input
+              type="date"
+              className="border border-gray-300 p-2 w-full rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              value={newTask.dueDate}
+              onChange={(e) =>
+                setNewTask({ ...newTask, dueDate: e.target.value })
+              }
+            />
           </div>
 
           {/* Add Button */}
           <div className="w-48">
             <button
-              onClick={handleAddProject}
+              onClick={handleAddTask}
               className="w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition duration-200"
             >
-              Add Project
+              Add Task
             </button>
           </div>
         </div>
       </div>
 
-      {/* Project List */}
+      {/* Task List */}
       <div>
-        <h2 className="text-lg font-semibold mb-2">Project Lists</h2>
-        {projects.length === 0 ? (
-          <p className="text-gray-500">No projects available.</p>
+        <h2 className="text-lg font-semibold mb-2">Task List</h2>
+        {tasks.length === 0 ? (
+          <p className="text-gray-500">No tasks available.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full bg-white shadow-lg rounded-lg overflow-hidden">
@@ -175,34 +191,37 @@ const ProjectDashboard: React.FC = () => {
                   <th className="px-4 py-3 text-left text-gray-600 font-medium">
                     Status
                   </th>
+                  <th className="px-4 py-3 text-left text-gray-600 font-medium">
+                    Due Date
+                  </th>
                   <th className="px-4 py-3 text-gray-600 font-medium">
                     Actions
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {projects.map((proj) => {
-                  const isEditing = editingProjectId === proj._id;
+                {tasks.map((task) => {
+                  const isEditing = editingTaskId === task._id;
                   return (
                     <tr
-                      key={proj._id}
+                      key={task._id}
                       className="border-b border-gray-200 hover:bg-gray-50 transition-colors duration-200"
                     >
                       {/* Title */}
                       <td className="px-4 py-2">
                         {isEditing ? (
                           <input
-                            className="w-full border-b border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-400 p-1 text-lg font-semibold"
-                            value={editFormData?.title || ""}
+                            className="w-full border-b border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-400 p-1"
+                            value={editTaskData?.title || ""}
                             onChange={(e) =>
-                              setEditFormData({
-                                ...editFormData!,
+                              setEditTaskData({
+                                ...editTaskData!,
                                 title: e.target.value,
                               })
                             }
                           />
                         ) : (
-                          <span className="font-semibold">{proj.title}</span>
+                          <span>{task.title}</span>
                         )}
                       </td>
 
@@ -212,16 +231,16 @@ const ProjectDashboard: React.FC = () => {
                           <textarea
                             className="w-full border border-gray-300 rounded-lg p-1 focus:outline-none focus:ring-1 focus:ring-blue-400"
                             rows={1}
-                            value={editFormData?.description || ""}
+                            value={editTaskData?.description || ""}
                             onChange={(e) =>
-                              setEditFormData({
-                                ...editFormData!,
+                              setEditTaskData({
+                                ...editTaskData!,
                                 description: e.target.value,
                               })
                             }
                           />
                         ) : (
-                          <span>{proj.description}</span>
+                          <span>{task.description}</span>
                         )}
                       </td>
 
@@ -230,27 +249,39 @@ const ProjectDashboard: React.FC = () => {
                         {isEditing ? (
                           <select
                             className="w-full border border-gray-300 rounded-lg p-1 focus:outline-none focus:ring-1 focus:ring-blue-400"
-                            value={editFormData?.status || "active"}
+                            value={editTaskData?.status || "todo"}
                             onChange={(e) =>
-                              setEditFormData({
-                                ...editFormData!,
-                                status: e.target.value as Project["status"],
+                              setEditTaskData({
+                                ...editTaskData!,
+                                status: e.target.value as Task["status"],
                               })
                             }
                           >
-                            <option value="active">Active</option>
-                            <option value="completed">Completed</option>
+                            <option value="todo">Todo</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="done">Done</option>
                           </select>
                         ) : (
-                          <span
-                            className={`px-2 py-1 rounded text-white ${
-                              proj.status === "active"
-                                ? "bg-blue-500"
-                                : "bg-green-500"
-                            }`}
-                          >
-                            {proj.status}
-                          </span>
+                          <span>{task.status}</span>
+                        )}
+                      </td>
+
+                      {/* Due Date */}
+                      <td className="px-4 py-2">
+                        {isEditing ? (
+                          <input
+                            type="date"
+                            className="w-full border border-gray-300 rounded-lg p-1 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                            value={editTaskData?.dueDate?.split("T")[0] || ""}
+                            onChange={(e) =>
+                              setEditTaskData({
+                                ...editTaskData!,
+                                dueDate: e.target.value,
+                              })
+                            }
+                          />
+                        ) : (
+                          <span>{task.dueDate?.split("T")[0]}</span>
                         )}
                       </td>
 
@@ -258,7 +289,7 @@ const ProjectDashboard: React.FC = () => {
                       <td className="px-4 py-2 text-center space-x-2">
                         {isEditing ? (
                           <button
-                            onClick={() => handleSaveProject(proj._id)}
+                            onClick={() => handleSaveTask(task._id)}
                             className="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 transition-colors duration-200"
                           >
                             Save
@@ -266,11 +297,12 @@ const ProjectDashboard: React.FC = () => {
                         ) : (
                           <button
                             onClick={() => {
-                              setEditingProjectId(proj._id);
-                              setEditFormData({
-                                title: proj.title,
-                                description: proj.description,
-                                status: proj.status,
+                              setEditingTaskId(task._id);
+                              setEditTaskData({
+                                title: task.title,
+                                description: task.description,
+                                status: task.status,
+                                dueDate: task.dueDate,
                               });
                             }}
                             className="bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600 transition-colors duration-200"
@@ -280,19 +312,10 @@ const ProjectDashboard: React.FC = () => {
                         )}
 
                         <button
-                          onClick={() => handleDeleteProject(proj._id)}
+                          onClick={() => handleDeleteTask(task._id)}
                           className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition-colors duration-200"
                         >
                           Delete
-                        </button>
-
-                        <button
-                          onClick={() =>
-                            navigate(`/projects/${proj._id}/tasks`)
-                          }
-                          className="bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600 transition-colors duration-200"
-                        >
-                          Tasks
                         </button>
                       </td>
                     </tr>
@@ -307,4 +330,4 @@ const ProjectDashboard: React.FC = () => {
   );
 };
 
-export default ProjectDashboard;
+export default TaskDashboard;

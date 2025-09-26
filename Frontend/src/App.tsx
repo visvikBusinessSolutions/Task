@@ -5,6 +5,7 @@ import Signup from "./pages/Signup";
 import Home from "./pages/Home";
 import { useState, type ReactElement } from "react";
 import RefrshHandler from "./RefrshHandler";
+import TaskDashboard from "./component/task";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -25,6 +26,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/home" element={<PrivateRoute element={<Home />} />} />
+        <Route path="/projects/:id/tasks" element={<PrivateRoute element={<TaskDashboard />} />} />
       </Routes>
     </div>
   );
