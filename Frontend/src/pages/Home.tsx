@@ -1,8 +1,8 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { handleError, handleSuccess } from "../utils";
 import { ToastContainer } from "react-toastify";
+import ProjectDashboard from "../component/project";
 
 interface Product {
   name: string;
@@ -49,20 +49,14 @@ function Home() {
   }, []);
 
   return (
-    <div>
-      <h1>Welcome
-        {loggedInUser}
-      </h1>
-      <button onClick={handleLogout}>Logout</button>
+    <div className="full">
+      <div className="flex justify-between items-center md:mx-auto md:p-6">
+        <h1 className="md:text-4xl text-2xl">Welcome {loggedInUser}</h1>
+        <button onClick={handleLogout}>Logout</button>
+      </div>
+
       <div>
-        {products &&
-          products.map((item, index) => (
-            <ul key={index}>
-              <span>
-                {item.name} : {item.description}
-              </span>
-            </ul>
-          ))}
+        <ProjectDashboard />
       </div>
       <ToastContainer />
     </div>
