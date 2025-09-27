@@ -1,4 +1,3 @@
-
 import React, { useState, type FormEvent, type ChangeEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
@@ -71,61 +70,64 @@ const Login: React.FC = () => {
     }
   };
 
-
   return (
-    <div className="container">
-      <h1>Login</h1>
-      <form onSubmit={handleLogin}>
-        <div>
-          <label htmlFor="email">Email</label>
-          <input
-            onChange={handleChange}
-            type="email"
-            name="email"
-            placeholder="Enter your email..."
-            value={loginInfo.email}
-          />
-        </div>
-        <div style={{ position: "relative" }}>
-          <label htmlFor="password">Password</label>
-          <input
-            onChange={handleChange}
-            type={showPassword ? "text" : "password"}
-            name="password"
-            placeholder="Enter your password..."
-            value={loginInfo.password}
-          />
-          <button
-            type="button"
-            onClick={togglePasswordVisibility}
-            style={{
-              position: "absolute",
-              right: "10px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              fontSize: "16px",
-            }}
-          >
-            {showPassword ? (
-              <span role="img" aria-label="hide password">
-                👁️
-              </span>
-            ) : (
-              <span role="img" aria-label="show password">
-                🔒
-              </span>
-            )}
+    <div className="w-full h-full flex justify-center items-center">
+      <div className="container">
+        <h1>Login </h1>
+        <form onSubmit={handleLogin}>
+          <div>
+            <label htmlFor="email">Email</label>
+            <input
+              onChange={handleChange}
+              type="email"
+              name="email"
+              placeholder="Enter your email..."
+              value={loginInfo.email}
+            />
+          </div>
+          <div style={{ position: "relative" }}>
+            <label htmlFor="password">Password</label>
+            <input
+              onChange={handleChange}
+              type={showPassword ? "text" : "password"}
+              name="password"
+              placeholder="Enter your password..."
+              value={loginInfo.password}
+            />
+            <button
+              type="button"
+              onClick={togglePasswordVisibility}
+              style={{
+                position: "absolute",
+                right: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontSize: "16px",
+              }}
+            >
+              {showPassword ? (
+                <span role="img" aria-label="hide password">
+                  👁️
+                </span>
+              ) : (
+                <span role="img" aria-label="show password">
+                  🔒
+                </span>
+              )}
+            </button>
+          </div>
+          <button type="submit" className="bg-blue-600">
+            Login
           </button>
-        </div>
-        <button type="submit">Login</button>
-        <span>
-          Does't have an account ?<Link to="/signup">Signup</Link>
-        </span>
-      </form>
-      <ToastContainer />
+          <span>
+            Does't have an account ?<Link to="/signup">Signup</Link>
+          </span>
+        </form>
+        <ToastContainer />
+      </div>
     </div>
   );
 };
