@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { handleSuccess } from "../utils";
 import { ToastContainer } from "react-toastify";
-import ProjectDashboard from "../component/project";
+import ProjectDashboard from "../components/project";
 
 function Home() {
   const [loggedInUser, setLoggedInUser] = useState<string | null>("");
@@ -12,7 +12,7 @@ function Home() {
     setLoggedInUser(localStorage.getItem("loggedInUser"));
   }, []);
 
-  const handleLogout = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("loggedInUser");
     handleSuccess("User Loggedout");
@@ -21,7 +21,6 @@ function Home() {
     }, 1000);
   };
 
-  
   return (
     <div className="full">
       <div className="flex justify-between items-center md:mx-auto md:p-6">
