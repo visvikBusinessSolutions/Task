@@ -24,6 +24,7 @@ function App() {
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/projects/${proj._id}/tasks" element={<TaskDashboard />} />
         <Route path="/home" element={<PrivateRoute element={<Home />} />} />
         <Route
           path="/projects/:id/tasks"
