@@ -17,8 +17,10 @@ const RefrshHandler: React.FC<RefrshHandlerProps> = ({
       if (
         location.pathname === "/" ||
         location.pathname === "/login" ||
-        location.pathname === "/signup"||
-        location.pathname === "/home"
+        location.pathname === "/signup" ||
+        location.pathname === "/home" ||
+        location.pathname === "/projects/${proj._id}/tasks" ||
+        location.pathname==="/projects/:id/tasks"
       ) {
         navigate("/home", { replace: false });
       }
