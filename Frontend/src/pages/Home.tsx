@@ -22,6 +22,13 @@ function Home() {
   };
 
   return (
+
+    <div className="full">
+      <div className="flex justify-between items-center md:mx-auto md:p-6">
+        <h1 className="md:text-4xl text-2xl">Welcome {loggedInUser}</h1>
+        <button onClick={handleLogout} className="bg-purple-500 text-white p-3 rounded-lg font-semibold hover:bg-purple-600 transition duration-200" >Logout</button>
+      </div>
+
     // <div className="full">
     //   <div className="flex justify-between items-center md:mx-auto md:p-6 shadow-xl border-gray rounded-xl bg-[#F2F2F2]/60">
     //     <h1 className="md:text-4xl text-2xl">Welcome {loggedInUser}</h1>
@@ -29,6 +36,7 @@ function Home() {
     //       Logout
     //     </button>
     //   </div>
+
 
     //   <div>
     //     <ProjectDashboard />
