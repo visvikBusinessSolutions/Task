@@ -62,6 +62,7 @@ const Signup: React.FC = () => {
   };
 
   return (
+
     <motion.div
       className="container"
       initial={{ opacity: 0, y: 40 }}
@@ -163,6 +164,77 @@ const Signup: React.FC = () => {
       </form>
       <ToastContainer />
     </motion.div>
+
+    <div className="w-full h-full flex justify-center items-center">
+      <div className="container">
+        <h1>Signup</h1>
+        <form onSubmit={handleSignup}>
+          <div>
+            <label htmlFor="name">Name</label>
+            <input
+              onChange={handleChange}
+              type="text"
+              name="name"
+              autoFocus
+              placeholder="Enter your name..."
+              value={signupInfo.name}
+            />
+          </div>
+          <div>
+            <label htmlFor="email">Email</label>
+            <input
+              onChange={handleChange}
+              type="email"
+              name="email"
+              placeholder="Enter your email..."
+              value={signupInfo.email}
+            />
+          </div>
+          <div style={{ position: "relative" }}>
+            <label htmlFor="password">Password</label>
+            <input
+              onChange={handleChange}
+              type={showPassword ? "text" : "password"}
+              name="password"
+              placeholder="Enter your password..."
+              value={signupInfo.password}
+            />
+            <button
+              type="button"
+              onClick={togglePasswordVisibility}
+              style={{
+                position: "absolute",
+                right: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontSize: "16px",
+              }}
+            >
+              {showPassword ? (
+                <span role="img" aria-label="hide password">
+                  👁️
+                </span>
+              ) : (
+                <span role="img" aria-label="show password">
+                  🔒
+                </span>
+              )}
+            </button>
+          </div>
+          <button type="submit" className="bg-blue-500">
+            Signup
+          </button>
+          <span>
+            Already have an account ?<Link to="/login">Login</Link>
+          </span>
+        </form>
+        <ToastContainer />
+      </div>
+    </div>
+
   );
 };
 

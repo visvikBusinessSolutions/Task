@@ -58,6 +58,7 @@ const Login: React.FC = () => {
   };
 
   return (
+
     <motion.div
       className="container"
       initial={{ opacity: 0, y: 40 }}
@@ -139,6 +140,66 @@ const Login: React.FC = () => {
       </form>
       <ToastContainer />
     </motion.div>
+
+    <div className="w-full h-full flex justify-center items-center">
+      <div className="container">
+        <h1>Login </h1>
+        <form onSubmit={handleLogin}>
+          <div>
+            <label htmlFor="email">Email</label>
+            <input
+              onChange={handleChange}
+              type="email"
+              name="email"
+              placeholder="Enter your email..."
+              value={loginInfo.email}
+            />
+          </div>
+          <div style={{ position: "relative" }}>
+            <label htmlFor="password">Password</label>
+            <input
+              onChange={handleChange}
+              type={showPassword ? "text" : "password"}
+              name="password"
+              placeholder="Enter your password..."
+              value={loginInfo.password}
+            />
+            <button
+              type="button"
+              onClick={togglePasswordVisibility}
+              style={{
+                position: "absolute",
+                right: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontSize: "16px",
+              }}
+            >
+              {showPassword ? (
+                <span role="img" aria-label="hide password">
+                  👁️
+                </span>
+              ) : (
+                <span role="img" aria-label="show password">
+                  🔒
+                </span>
+              )}
+            </button>
+          </div>
+          <button type="submit" className="bg-blue-600">
+            Login
+          </button>
+          <span>
+            Does't have an account ?<Link to="/signup">Signup</Link>
+          </span>
+        </form>
+        <ToastContainer />
+      </div>
+    </div>
+
   );
 };
 
